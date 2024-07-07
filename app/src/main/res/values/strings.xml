@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MemoCards</string>
+    <string name="prefs_file">com.foliaco.PREFERENCE_FILE_KEY</string>
+</resources>
