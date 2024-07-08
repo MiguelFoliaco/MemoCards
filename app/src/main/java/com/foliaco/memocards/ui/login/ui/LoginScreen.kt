@@ -4,13 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,17 +31,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.foliaco.memocards.R
 import kotlinx.coroutines.launch
+
 
 
 @Composable
@@ -58,6 +57,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
 }
 
 
+
 @Composable
 fun Login(modifier: Modifier, viewModel: LoginViewModel) {
     val email: String by viewModel.email.observeAsState("")
@@ -67,7 +67,7 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
     val stateModal: Boolean by viewModel.isSuccessFullLogin.observeAsState(true)
     val msgLoginInfo: String by viewModel.msgLogin.observeAsState("")
     val rememberCoroutine = rememberCoroutineScope()
-    print("State Modal ${stateModal}")
+    print("State Modal $stateModal")
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(Modifier.align(Alignment.Center))
@@ -101,16 +101,16 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
         Spacer(modifier = modifier.padding(5.dp))
         GuestButton()
         Spacer(modifier = modifier.padding(5.dp))
-        GoogleButton(modifier)
+        GoogleButton(modifier) { viewModel.sigInWithGoogle() }
         Spacer(modifier = modifier.padding(16.dp))
         LogUpText(modifier)
     }
 }
 
 @Composable
-fun GoogleButton(modifier: Modifier) {
+fun GoogleButton(modifier: Modifier, googleSignIn: () -> Unit) {
     Button(
-        onClick = { },
+        onClick = { googleSignIn() },
         shape = RoundedCornerShape(0.dp),
         colors = ButtonColors(
             contentColor = Color(0xFFFFFFFF),
@@ -179,7 +179,7 @@ fun ModalSessionInfo(modifier: Modifier, msgLoginInfo: String, closeModal: () ->
                     onClick = { closeModal() },
                     modifier = modifier
                         .fillMaxWidth()
-                        .absoluteOffset(y = 30.dp),
+                        .absoluteOffset(y = 10.dp),
                     shape = RoundedCornerShape(0.dp),
                     colors = ButtonColors(
                         containerColor = Color(0xFFFF9090),
@@ -195,7 +195,6 @@ fun ModalSessionInfo(modifier: Modifier, msgLoginInfo: String, closeModal: () ->
         }
     }
 }
-
 
 @Composable
 fun GuestButton() {
