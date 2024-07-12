@@ -1,5 +1,8 @@
 package com.foliaco.memocards.ui.login.ui
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,12 +45,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.foliaco.memocards.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
+
     Box(
         Modifier
             .fillMaxSize()
@@ -55,7 +65,6 @@ fun LoginScreen(viewModel: LoginViewModel) {
         Login(Modifier.align(Alignment.Center), viewModel)
     }
 }
-
 
 
 @Composable
@@ -67,7 +76,7 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
     val stateModal: Boolean by viewModel.isSuccessFullLogin.observeAsState(true)
     val msgLoginInfo: String by viewModel.msgLogin.observeAsState("")
     val rememberCoroutine = rememberCoroutineScope()
-    print("State Modal $stateModal")
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(Modifier.align(Alignment.Center))
@@ -101,16 +110,18 @@ fun Login(modifier: Modifier, viewModel: LoginViewModel) {
         Spacer(modifier = modifier.padding(5.dp))
         GuestButton()
         Spacer(modifier = modifier.padding(5.dp))
-        GoogleButton(modifier) { viewModel.sigInWithGoogle() }
+        GoogleButton(modifier, viewModel)
         Spacer(modifier = modifier.padding(16.dp))
         LogUpText(modifier)
     }
 }
 
 @Composable
-fun GoogleButton(modifier: Modifier, googleSignIn: () -> Unit) {
+fun GoogleButton(modifier: Modifier, viewModel: LoginViewModel) {
     Button(
-        onClick = { googleSignIn() },
+        onClick = {
+            viewModel.sigInWithGoogle()
+        },
         shape = RoundedCornerShape(0.dp),
         colors = ButtonColors(
             contentColor = Color(0xFFFFFFFF),

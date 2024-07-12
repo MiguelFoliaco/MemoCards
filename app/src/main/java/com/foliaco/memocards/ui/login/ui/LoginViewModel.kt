@@ -1,18 +1,16 @@
 package com.foliaco.memocards.ui.login.ui
 
-import android.content.Context
-import android.content.res.Resources
 import android.util.Patterns
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.foliaco.memocards.R
 import com.foliaco.memocards.screens.Screens
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 enum class ProviderAuthType {
     BASIC,
@@ -20,9 +18,9 @@ enum class ProviderAuthType {
 }
 
 class LoginViewModel(
-    private val navController: NavController
+    private val navController: NavController,
+    private val singInGoogle: () -> Unit
 ) : ViewModel() {
-
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
 
@@ -40,6 +38,7 @@ class LoginViewModel(
 
     private val _msgLogin = MutableLiveData<String>("")
     val msgLogin: LiveData<String> = _msgLogin
+
 
     fun onLoginChange(email: String, password: String) {
         _email.value = email
@@ -74,18 +73,7 @@ class LoginViewModel(
     }
 
     fun sigInWithGoogle() {
-        val res = Resources.getSystem()
-        val signInRequest = BeginSignInRequest.builder()
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(res.getString(R.string.default_web_client_id))
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(true)
-                    .build()
-            )
-            .build()
+        singInGoogle()
 
     }
 }

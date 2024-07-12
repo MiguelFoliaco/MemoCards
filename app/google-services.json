@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "827966306102-7136t3lr1vlomhblo4g91ss4psp363tv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.foliaco.memocards",
+            "certificate_hash": "27799a5ba1e47346bcd624cf1f8a2ff6b97d3338"
+          }
+        },
+        {
           "client_id": "827966306102-t174mvfm2lrbat72ut18hair9d23sp2v.apps.googleusercontent.com",
           "client_type": 3
         }
