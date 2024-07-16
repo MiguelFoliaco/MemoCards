@@ -1,16 +1,14 @@
-package com.foliaco.memocards.ui.login.ui
+package com.foliaco.memocards.modules.login.ui
 
+import android.content.Intent
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import com.foliaco.memocards.HomeActivity
 import com.foliaco.memocards.screens.Screens
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 
 enum class ProviderAuthType {
     BASIC,
@@ -62,7 +60,8 @@ class LoginViewModel(
                 if (it.isSuccessful) {
 
                     _isSuccessFullLogin.value = false
-                    navController.navigate(Screens.HomeScreen.route)
+                    val intent=Intent(navController.context,HomeActivity::class.java)
+                    navController.context.startActivity(intent)
                 } else {
                     _isSuccessFullLogin.value = true
                     _msgLogin.value =
@@ -74,6 +73,5 @@ class LoginViewModel(
 
     fun sigInWithGoogle() {
         singInGoogle()
-
     }
 }

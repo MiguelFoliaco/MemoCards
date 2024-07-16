@@ -1,4 +1,4 @@
-package com.foliaco.memocards.ui.theme
+package com.foliaco.memocards.modules.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
