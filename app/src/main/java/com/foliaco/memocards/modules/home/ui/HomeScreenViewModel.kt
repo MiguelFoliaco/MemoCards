@@ -17,10 +17,13 @@ class HomeScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val lenguajeSelect = MutableLiveData<String>("Japones/日本語")
+    val lenguajeIdSelect = MutableLiveData<String>("")
     var memos = MutableLiveData<MutableList<Memos>>(mutableListOf())
+    var isLoadingMemos = MutableLiveData<Boolean>(true)
 
-    fun setLenguaje(name: String) {
+    fun setLenguaje(name: String, id: String) {
         lenguajeSelect.postValue(name)
+        lenguajeIdSelect.postValue(id)
     }
 
     fun getLenguajes(): MutableMap<String, Map<String, Any>> {
@@ -32,11 +35,12 @@ class HomeScreenViewModel @Inject constructor(
         return firebaseModel.lenguaje
     }
 
-    fun getCardByIdLenguaje() {
+    fun getCardByIdLenguaje(id: String) {
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
+            isLoadingMemos.postValue(true)
             val memosValues = mutableListOf<Memos>()
-            val result = firebaseModel.getCardsByIdLenguajes().await()
+            val result = firebaseModel.getCardsByIdLenguajes(id).await()
             for (doc in result.documents) {
                 var item = Memos(
                     id = doc.id,
@@ -52,7 +56,24 @@ class HomeScreenViewModel @Inject constructor(
                 memosValues.add(item)
             }
             memos.postValue(memosValues)
-        }
-            .start()
+            isLoadingMemos.postValue(false)
+
+        }.start()
+    }
+
+    fun enableOrDisableWidget(memo: Memos, idMemo: String) {
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            isLoadingMemos.postValue(true)
+            firebaseModel.enableOrDisableWidget(
+                card = memo,
+                idCard = idMemo
+            )
+            val id = memo.lenguajeId
+            if (id != null) {
+                getCardByIdLenguaje(id)
+            }
+            isLoadingMemos.postValue(false)
+        }.start()
     }
 }

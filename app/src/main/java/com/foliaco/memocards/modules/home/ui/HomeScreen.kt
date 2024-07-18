@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -24,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -47,15 +49,14 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
     val scope = rememberCoroutineScope()
     val listLenguajes = viewModel.getLenguajes()
     val lenguajeSelected: String by viewModel.lenguajeSelect.observeAsState("")
+    val lenguajeIdSelected: String by viewModel.lenguajeIdSelect.observeAsState("")
+    val isLoadingMemos: Boolean by viewModel.isLoadingMemos.observeAsState(initial = true)
     val memos: MutableList<Memos> by viewModel.memos.observeAsState(mutableListOf())
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.getCardByIdLenguaje()
+        viewModel.getCardByIdLenguaje(lenguajeIdSelected)
     }
 
-    if (user == null) {
-        return CircularProgressIndicator()
-    }
     Column {
         Row(
             horizontalArrangement = Arrangement.Absolute.SpaceBetween,
@@ -92,11 +93,12 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                 sheetState = sheetState,
                 scope = scope,
                 listLenguajes = listLenguajes,
-                onSelect = {
-                    val item = listLenguajes[it]
-                    if (item != null) {
-                        viewModel.setLenguaje(item["title"] as String)
-                    }
+                onSelect = { name, id ->
+                    viewModel.setLenguaje(
+                        name,
+                        id
+                    )
+                    viewModel.getCardByIdLenguaje(id)
                 }
             )
         }
@@ -105,37 +107,54 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                 text = "Items ${memos?.size}",
                 modifier = Modifier.padding(bottom = 5.dp, start = 15.dp)
             )
-            LazyColumn(
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .padding(0.dp)
-                    .fillMaxWidth()
-            ) {
-                items(memos.size) {
-                    ListItem(
-                        headlineContent = {
-                            CardItemList(
-                                modifier = Modifier,
-                                memo = memos[it]
-                            )
-                        },
-                        colors = ListItemColors(
-                            containerColor = Color.Transparent,
-                            headlineColor = Color.Transparent,
-                            disabledHeadlineColor = Color.Transparent,
-                            leadingIconColor = Color.Transparent,
-                            overlineColor = Color.Transparent,
-                            trailingIconColor = Color.Transparent,
-                            supportingTextColor = Color.Transparent,
-                            disabledLeadingIconColor = Color.Transparent,
-                            disabledTrailingIconColor = Color.Transparent
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(0.dp),
+            if (isLoadingMemos) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        trackColor = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.secondaryContainer
                     )
                 }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .padding(0.dp)
+                        .fillMaxWidth()
+                ) {
+                    items(memos.size) {
+                        ListItem(
+                            headlineContent = {
+                                CardItemList(
+                                    modifier = Modifier,
+                                    memo = memos[it],
+                                    viewModel=viewModel
+                                )
+                            },
+                            colors = ListItemColors(
+                                containerColor = Color.Transparent,
+                                headlineColor = Color.Transparent,
+                                disabledHeadlineColor = Color.Transparent,
+                                leadingIconColor = Color.Transparent,
+                                overlineColor = Color.Transparent,
+                                trailingIconColor = Color.Transparent,
+                                supportingTextColor = Color.Transparent,
+                                disabledLeadingIconColor = Color.Transparent,
+                                disabledTrailingIconColor = Color.Transparent
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(0.dp),
+                        )
+                    }
+                }
             }
+
         }
     }
 }

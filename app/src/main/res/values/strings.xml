@@ -3,4 +3,7 @@
     <string name="prefs_file">com.foliaco.PREFERENCE_FILE_KEY</string>
     <string name="web_client_id">827966306102-t174mvfm2lrbat72ut18hair9d23sp2v.apps.googleusercontent.com</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">This is an app widget description</string>
 </resources>

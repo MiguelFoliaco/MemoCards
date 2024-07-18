@@ -22,13 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.foliaco.memocards.modules.home.model.Memos
+import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.theme.ColorText
 import com.foliaco.memocards.modules.theme.ColorText2
 import com.foliaco.memocards.modules.theme.DisableButton
@@ -37,21 +35,22 @@ import com.foliaco.memocards.modules.theme.Easy
 import com.foliaco.memocards.modules.theme.Hard
 import com.foliaco.memocards.modules.theme.MemoCardsTheme
 import com.foliaco.memocards.modules.theme.Middle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
-fun CardItemList(modifier: Modifier, memo: Memos) {
+fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel) {
 
     MemoCardsTheme {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .clickable { }
-                .clip(shape = RoundedCornerShape(5.dp))
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 10.dp, vertical = 15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable { }
+            .clip(shape = RoundedCornerShape(5.dp))
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(horizontal = 10.dp, vertical = 15.dp),
+            horizontalArrangement = Arrangement.SpaceBetween) {
             Column(
                 modifier = modifier
                     .fillMaxHeight()
@@ -81,7 +80,8 @@ fun CardItemList(modifier: Modifier, memo: Memos) {
             ) {
                 val nivel = "easy"
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                    },
                     colors = ButtonColors(
                         disabledContainerColor = DisableButton,
                         contentColor = ColorText,
@@ -99,23 +99,23 @@ fun CardItemList(modifier: Modifier, memo: Memos) {
                         .wrapContentHeight()
                         .padding(0.dp)
                         .height(30.dp)
-                )
-                {
+                ) {
                     Text(
-                        text = nivel,
-                        fontSize = 16.sp,
-                        color = ColorText
+                        text = nivel, fontSize = 16.sp, color = ColorText
                     )
                 }
-                val widget = memo.widget ?: false
                 Button(
-                    onClick = { /*TODO*/ },
-                    enabled = widget,
+                    onClick = {
+                        if (memo.id != null) {
+                            memo.lenguajeId = viewModel.lenguajeIdSelect.value
+                            viewModel.enableOrDisableWidget(memo = memo, idMemo = memo.id)
+                        }
+                    },
                     colors = ButtonColors(
                         disabledContainerColor = DisableButton,
-                        contentColor = ColorText,
+                        contentColor = if (memo.widget == true) ColorText else DisableText,
                         disabledContentColor = DisableText,
-                        containerColor = MaterialTheme.colorScheme.secondary
+                        containerColor = if (memo.widget == true) MaterialTheme.colorScheme.secondary else DisableButton
                     ),
                     shape = RoundedCornerShape(4.dp),
                     contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
@@ -123,8 +123,7 @@ fun CardItemList(modifier: Modifier, memo: Memos) {
                         .wrapContentHeight()
                         .padding(0.dp)
                         .height(30.dp)
-                )
-                {
+                ) {
                     Text(
                         text = "Widget",
                         fontSize = 16.sp,
