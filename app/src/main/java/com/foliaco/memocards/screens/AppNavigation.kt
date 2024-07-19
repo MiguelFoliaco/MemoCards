@@ -1,11 +1,15 @@
 package com.foliaco.memocards.screens
 
 import android.content.Intent
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.foliaco.memocards.HomeActivity
+import com.foliaco.memocards.modules.components.ScaffoldCustomHome
+import com.foliaco.memocards.modules.home.ui.HomeScreen
+import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.login.ui.LoginScreen
 import com.foliaco.memocards.modules.login.ui.LoginViewModel
 import com.google.firebase.Firebase
@@ -20,8 +24,8 @@ fun AppNavigation(loginGoogle: () -> Unit) {
     NavHost(navController = navController, startDestination = Screens.LoginScreen.route) {
         composable(Screens.LoginScreen.route) {
             val viewModel = LoginViewModel(navController, loginGoogle)
-            if(user!=null){
-                val intent=Intent(navController.context, HomeActivity::class.java)
+            if (user != null) {
+                val intent = Intent(navController.context, HomeActivity::class.java)
                 navController.context.startActivity(intent)
             }
             println("Usuario $user")
@@ -35,3 +39,25 @@ fun AppNavigation(loginGoogle: () -> Unit) {
 //        }
     }
 }
+
+
+@Composable
+fun AppNavigationHome(viewModel: HomeScreenViewModel) {
+    val navController = rememberNavController()
+    val auth = Firebase.auth
+    val user = auth.currentUser
+    NavHost(navController = navController, startDestination = ListScreensHome.home.route) {
+        composable(route = ListScreensHome.home.route) {
+            ScaffoldCustomHome(navController) {
+                HomeScreen(viewModel = viewModel)
+            }
+        }
+        composable(route = ListScreensHome.add.route) {
+            ScaffoldCustomHome(navController) {
+                Text(text = "Hola mundo")
+            }
+        }
+    }
+}
+
+

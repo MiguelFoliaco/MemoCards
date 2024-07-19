@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -45,7 +46,7 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
     MemoCardsTheme {
         Row(modifier = modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(130.dp)
             .clickable { }
             .clip(shape = RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.primary)
@@ -54,7 +55,7 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
             Column(
                 modifier = modifier
                     .fillMaxHeight()
-                    .width(150.dp),
+                    .wrapContentWidth(),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -63,6 +64,23 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
+                if (memo.reading_on != "null") {
+                    println("Hola Error ${memo.reading_on}")
+                Text(
+                    text = memo.reading_on.toString(),
+                    color = ColorText2,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                }
+                if(memo.reading_kun!="null"){
+                Text(
+                    text = memo.reading_kun.toString(),
+                    color = ColorText2,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                }
                 Text(
                     text = memo.value.toString(),
                     color = ColorText2,
@@ -73,37 +91,37 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
             Row(
                 modifier = modifier
                     .fillMaxHeight()
-                    .fillMaxWidth()
+                    .wrapContentWidth()
                     .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                val nivel = "easy"
-                Button(
-                    onClick = {
-                    },
-                    colors = ButtonColors(
-                        disabledContainerColor = DisableButton,
-                        contentColor = ColorText,
-                        disabledContentColor = DisableText,
-                        containerColor = when (nivel) {
-                            "easy" -> Easy
-                            "middle" -> Middle
-                            "hard" -> Hard
-                            else -> Easy
-                        }
-                    ),
-                    shape = RoundedCornerShape(4.dp),
-                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
-                    modifier = modifier
-                        .wrapContentHeight()
-                        .padding(0.dp)
-                        .height(30.dp)
-                ) {
-                    Text(
-                        text = nivel, fontSize = 16.sp, color = ColorText
-                    )
-                }
+//                val nivel = "easy"
+//                Button(
+//                    onClick = {
+//                    },
+//                    colors = ButtonColors(
+//                        disabledContainerColor = DisableButton,
+//                        contentColor = ColorText,
+//                        disabledContentColor = DisableText,
+//                        containerColor = when (nivel) {
+//                            "easy" -> Easy
+//                            "middle" -> Middle
+//                            "hard" -> Hard
+//                            else -> Easy
+//                        }
+//                    ),
+//                    shape = RoundedCornerShape(4.dp),
+//                    contentPadding = PaddingValues(vertical = 0.dp, horizontal = 10.dp),
+//                    modifier = modifier
+//                        .wrapContentHeight()
+//                        .padding(0.dp)
+//                        .height(30.dp)
+//                ) {
+//                    Text(
+//                        text = nivel, fontSize = 16.sp, color = ColorText
+//                    )
+//                }
                 Button(
                     onClick = {
                         if (memo.id != null) {

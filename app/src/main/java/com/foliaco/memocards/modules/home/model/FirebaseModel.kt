@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.input.key.Key
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.firestore
@@ -19,6 +20,7 @@ import kotlin.reflect.typeOf
 class FirebaseModel @Inject constructor() {
 
     private val db = Firebase.firestore
+    private val auth = Firebase.auth
     val lenguaje = mutableMapOf<String, Map<String, Any>>()
     fun getLenguajes() {
         db.collection(KeyCollections.LENGUAJE.collection).get()
@@ -45,9 +47,13 @@ class FirebaseModel @Inject constructor() {
         val lenguajeRef =
             db.collection(KeyCollections.LENGUAJE.collection)
                 .document(if (idLenguaje.isEmpty()) "IaKxel8JylgZkr1nhrnU" else idLenguaje)
+
         return withContext(Dispatchers.IO) {
             db.collection(KeyCollections.MEMOS.collection)
                 .whereEqualTo("lenguajeId", lenguajeRef)
+                .whereEqualTo("made_in", "admin")
+
+                //.whereArrayContainsAny("made_in", mutableListOf("admin", auth.currentUser!!.email))
                 .get()
         }
         //  println("List of Firebase Model $listMemosSet")

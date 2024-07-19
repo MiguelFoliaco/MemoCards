@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MemoCards" parent="android:Theme.Material.Light.NoActionBar"></style>
+    <style name="Theme.MemoCards" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:background">#FF232528</item>
+    </style>
 
     <style name="Theme.MemoCards.AppWidgetContainerParent" parent="@android:style/Theme.DeviceDefault">
         <!-- Radius of the outer bound of widgets to make the rounded corners -->
