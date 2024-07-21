@@ -64,22 +64,30 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
-                if (memo.reading_on != "null") {
+                if (memo.reading_on != "null" && memo.reading_on != "") {
                     println("Hola Error ${memo.reading_on}")
-                Text(
-                    text = memo.reading_on.toString(),
-                    color = ColorText2,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                    Text(
+                        text = memo.reading_on.toString(),
+                        color = ColorText2,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 }
-                if(memo.reading_kun!="null"){
-                Text(
-                    text = memo.reading_kun.toString(),
-                    color = ColorText2,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
+                if (memo.reading_kun != "null" && memo.reading_kun != "") {
+                    Text(
+                        text = memo.reading_kun.toString(),
+                        color = ColorText2,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+                if (memo.reading != "null" && (memo.reading_on == "null" || memo.reading_on == "") && (memo.reading_kun == "null" || memo.reading_kun == "")) {
+                    Text(
+                        text = memo.reading.toString(),
+                        color = ColorText2,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
                 }
                 Text(
                     text = memo.value.toString(),
@@ -124,7 +132,7 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
 //                }
                 Button(
                     onClick = {
-                        if (memo.id != null) {
+                        if (memo.id != null && memo.id != "") {
                             memo.lenguajeId = viewModel.lenguajeIdSelect.value
                             viewModel.enableOrDisableWidget(memo = memo, idMemo = memo.id)
                         }

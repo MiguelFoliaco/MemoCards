@@ -59,6 +59,24 @@ class FirebaseModel @Inject constructor() {
         //  println("List of Firebase Model $listMemosSet")
     }
 
+    suspend fun getCardsMeByIdLenguajes(idLenguaje: String): Task<QuerySnapshot> {
+
+        val lenguajeRef =
+            db.collection(KeyCollections.LENGUAJE.collection)
+                .document(if (idLenguaje.isEmpty()) "IaKxel8JylgZkr1nhrnU" else idLenguaje)
+
+        return withContext(Dispatchers.IO) {
+            db.collection(KeyCollections.MEMOS.collection)
+                .whereEqualTo("lenguajeId", lenguajeRef)
+                .whereEqualTo("made_in", auth.currentUser!!.email!!)
+
+                //.whereArrayContainsAny("made_in", mutableListOf("admin", auth.currentUser!!.email))
+                .get()
+        }
+        //  println("List of Firebase Model $listMemosSet")
+    }
+
+
     suspend fun enableOrDisableWidget(card: Memos, idCard: String) {
         val cardUpdate = hashMapOf<String, Any?>()
 //        cardUpdate.put("lenguajeId", card.lenguajeId)
@@ -77,6 +95,23 @@ class FirebaseModel @Inject constructor() {
         return withContext(Dispatchers.IO) {
             db.collection(KeyCollections.MEMOS.collection).document(idCard)
                 .update(cardUpdate)
+        }
+    }
+
+    suspend fun saveMemo(memo: Memos) {
+        val memoCreate = hashMapOf<String, Any?>()
+        val lenguajeReference =
+            db.collection(KeyCollections.LENGUAJE.collection).document(memo.lenguajeId!!)
+        memoCreate.put("key", memo.key)
+        memoCreate.put("value", memo.value)
+        memoCreate.put("reading", memo.reading.orEmpty())
+        memoCreate.put("reading_on", memo.reading_on.orEmpty())
+        memoCreate.put("reading_kun", memo.reading_kun.orEmpty())
+        memoCreate.put("widget", memo.widget!!.or(false))
+        memoCreate.put("lenguajeId", lenguajeReference)
+        memoCreate.put("made_in", auth.currentUser!!.email)
+        return withContext(Dispatchers.IO) {
+            db.collection(KeyCollections.MEMOS.collection).add(memoCreate)
         }
     }
 }

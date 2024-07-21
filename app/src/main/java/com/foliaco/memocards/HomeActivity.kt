@@ -1,5 +1,6 @@
 package com.foliaco.memocards
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import com.foliaco.memocards.modules.theme.MemoCardsTheme
 import com.foliaco.memocards.screens.AppNavigationHome
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -18,9 +20,13 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
-    private val auth = Firebase.auth
-    private val user = auth.currentUser!!
+    private val firebaseUser = FirebaseAuth.getInstance()
     private val viewModel: HomeScreenViewModel by viewModels()
+
+    override fun onStart() {
+        super.onStart()
+        validateSession()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +38,22 @@ class HomeActivity : ComponentActivity() {
         }
         setContent {
             MemoCardsTheme {
-                    AppNavigationHome(viewModel)
+                AppNavigationHome(viewModel) {
+                    clearActivity()
+                }
             }
         }
+    }
+
+    private fun validateSession() {
+        val user = firebaseUser.currentUser
+        if (user == null) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun clearActivity() {
+        finish()
     }
 }

@@ -1,5 +1,6 @@
 package com.foliaco.memocards.modules.components
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,16 +40,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
+import com.foliaco.memocards.MainActivity
 import com.foliaco.memocards.R
 import com.foliaco.memocards.screens.ListScreensHome
 import com.foliaco.memocards.utils.bottomBorder
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldCustomHome(navController: NavController, content: @Composable () -> Unit) {
+fun ScaffoldCustomHome(
+    navController: NavController,
+    clearActivity: () -> Unit,
+    content: @Composable () -> Unit,
+) {
     val auth = Firebase.auth
     val user = auth.currentUser
     Scaffold(
@@ -53,7 +66,8 @@ fun ScaffoldCustomHome(navController: NavController, content: @Composable () -> 
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color(0xFFFFFFFF),
-                ), title = {
+                ),
+                title = {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -62,12 +76,14 @@ fun ScaffoldCustomHome(navController: NavController, content: @Composable () -> 
                     ) {
                         Text(text = "Memo Cards")
                     }
-                }, modifier = Modifier.shadow(3.dp, ambientColor = Color(0xFF000000))
-            )
+                },
+                modifier = Modifier.shadow(3.dp, ambientColor = Color(0xFF000000)),
+
+                )
         },
         bottomBar = {
             if (user != null) {
-                BottomBarHome(user, navController)
+                BottomBarHome(user, navController, clearActivity)
             }
         }) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -77,7 +93,7 @@ fun ScaffoldCustomHome(navController: NavController, content: @Composable () -> 
 }
 
 @Composable
-fun BottomBarHome(user: FirebaseUser, navController: NavController) {
+fun BottomBarHome(user: FirebaseUser, navController: NavController, clearActivity: () -> Unit) {
     BottomAppBar(
         modifier = Modifier.height(70.dp),
         containerColor = MaterialTheme.colorScheme.primary,
@@ -146,9 +162,13 @@ fun BottomBarHome(user: FirebaseUser, navController: NavController) {
                     modifier = Modifier.size(60.dp)
                 )
             }
+            var statusMenu by remember { mutableStateOf(false) }
             IconButton(
-                onClick = { /*TODO*/ }, modifier = Modifier.size(30.dp)
+                onClick = {
+                    statusMenu = !statusMenu
+                }, modifier = Modifier.size(30.dp)
             ) {
+
                 if (user.photoUrl != null) {
                     SubcomposeAsyncImage(
                         model = user.photoUrl,
@@ -169,6 +189,20 @@ fun BottomBarHome(user: FirebaseUser, navController: NavController) {
                         tint = if (currentRoute === ListScreensHome.profile.route) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.background,
                         modifier = Modifier.size(30.dp)
                     )
+                }
+
+                DropdownMenu(expanded = statusMenu, onDismissRequest = {
+                    statusMenu = false
+                }) {
+                    DropdownMenuItem(text = {
+                        Text(text = "Cerrar sesión")
+                    }, onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        statusMenu = false
+                        val intent = Intent(navController.context, MainActivity::class.java)
+                        navController.context.startActivity(intent)
+                        clearActivity()
+                    })
                 }
             }
         }

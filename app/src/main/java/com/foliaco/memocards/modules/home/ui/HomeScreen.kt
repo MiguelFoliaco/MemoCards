@@ -47,6 +47,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.DocumentReference
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +64,6 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
     val memos: MutableList<Memos> by viewModel.memos.observeAsState(mutableListOf())
     LaunchedEffect(key1 = Unit) {
         viewModel.getCardByIdLenguaje(lenguajeIdSelected)
-
     }
 
     Column {
@@ -138,7 +138,7 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                                     CardItemList(
                                         modifier = Modifier, memo = memos[it], viewModel = viewModel
                                     )
-                                    if (it == 1) {
+                                    if (it % 3 == 0 && user!!.email.orEmpty() != "foliaco18@gmail.com") {
                                         Row(
                                             horizontalArrangement = Arrangement.Center,
                                             modifier = Modifier

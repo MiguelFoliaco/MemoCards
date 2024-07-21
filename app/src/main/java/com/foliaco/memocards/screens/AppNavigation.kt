@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.foliaco.memocards.HomeActivity
+import com.foliaco.memocards.modules.cards.ui.CrateCardScreen
+import com.foliaco.memocards.modules.cards.ui.CreateCardForm
 import com.foliaco.memocards.modules.components.ScaffoldCustomHome
 import com.foliaco.memocards.modules.home.ui.HomeScreen
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
@@ -42,19 +44,18 @@ fun AppNavigation(loginGoogle: () -> Unit) {
 
 
 @Composable
-fun AppNavigationHome(viewModel: HomeScreenViewModel) {
+fun AppNavigationHome(viewModel: HomeScreenViewModel, clearActivity: () -> Unit) {
     val navController = rememberNavController()
-    val auth = Firebase.auth
-    val user = auth.currentUser
+
     NavHost(navController = navController, startDestination = ListScreensHome.home.route) {
         composable(route = ListScreensHome.home.route) {
-            ScaffoldCustomHome(navController) {
+            ScaffoldCustomHome(navController, clearActivity) {
                 HomeScreen(viewModel = viewModel)
             }
         }
         composable(route = ListScreensHome.add.route) {
-            ScaffoldCustomHome(navController) {
-                Text(text = "Hola mundo")
+            ScaffoldCustomHome(navController, clearActivity) {
+                CrateCardScreen(viewModel)
             }
         }
     }

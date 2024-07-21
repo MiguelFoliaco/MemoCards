@@ -1,14 +1,17 @@
 package com.foliaco.memocards.modules.home.ui
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.foliaco.memocards.modules.home.model.FirebaseModel
 import com.foliaco.memocards.modules.home.model.Memos
+import com.google.firebase.firestore.DocumentReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,6 +23,13 @@ class HomeScreenViewModel @Inject constructor(
     val lenguajeIdSelect = MutableLiveData<String>("")
     var memos = MutableLiveData<MutableList<Memos>>(mutableListOf())
     var isLoadingMemos = MutableLiveData<Boolean>(true)
+    val isLoadinCreateMemos = MutableLiveData(false)
+    val isSuccessFullOrError = MutableLiveData<String>("")
+    val memoCreate = MutableLiveData(
+        Memos(
+            id = "", widget = false
+        )
+    )
 
     fun setLenguaje(name: String, id: String) {
         lenguajeSelect.postValue(name)
@@ -41,7 +51,9 @@ class HomeScreenViewModel @Inject constructor(
             isLoadingMemos.postValue(true)
             val memosValues = mutableListOf<Memos>()
             val result = firebaseModel.getCardsByIdLenguajes(id).await()
-            for (doc in result.documents) {
+            val result2 = firebaseModel.getCardsMeByIdLenguajes(id).await()
+            val docs=result.documents.union(result2.documents)
+            for (doc in docs) {
                 var item = Memos(
                     id = doc.id,
                     lenguajeId = doc["lenguajeId"].toString(),
@@ -59,6 +71,7 @@ class HomeScreenViewModel @Inject constructor(
             isLoadingMemos.postValue(false)
 
         }.start()
+
     }
 
     fun enableOrDisableWidget(memo: Memos, idMemo: String) {
@@ -66,8 +79,7 @@ class HomeScreenViewModel @Inject constructor(
         scope.launch {
             isLoadingMemos.postValue(true)
             firebaseModel.enableOrDisableWidget(
-                card = memo,
-                idCard = idMemo
+                card = memo, idCard = idMemo
             )
             val id = memo.lenguajeId
             if (id != null) {
@@ -75,5 +87,20 @@ class HomeScreenViewModel @Inject constructor(
             }
             isLoadingMemos.postValue(false)
         }.start()
+    }
+
+    fun saveMemoDb() {
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            isLoadinCreateMemos.postValue(true)
+            try {
+                firebaseModel.saveMemo(memoCreate.value!!)
+                isSuccessFullOrError.postValue("Todo bien")
+            } catch (er: Exception) {
+                Log.i("Error firebase Model", "${er.message}")
+                isSuccessFullOrError.postValue("Todo mal")
+            }
+            isLoadinCreateMemos.postValue(false)
+        }
     }
 }

@@ -9,5 +9,6 @@ data class Memos(
     var reading_on: String? = "",
     var reading_kun: String? = "",
     var value: String? = "",
-    var widget: Boolean?
+    var widget: Boolean?,
+    var made_in: String? = ""
 )
