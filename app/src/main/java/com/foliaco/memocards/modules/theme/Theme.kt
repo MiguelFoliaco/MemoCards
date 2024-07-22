@@ -12,6 +12,7 @@ private val DarkColorScheme = darkColorScheme(
     secondaryContainer = SecondaryDark,
     tertiary = Pink80,
     background = Background,
+    error = Hard
 )
 
 private val LightColorScheme = lightColorScheme(

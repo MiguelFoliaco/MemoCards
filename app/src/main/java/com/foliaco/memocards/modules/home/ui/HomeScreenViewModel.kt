@@ -52,7 +52,7 @@ class HomeScreenViewModel @Inject constructor(
             val memosValues = mutableListOf<Memos>()
             val result = firebaseModel.getCardsByIdLenguajes(id).await()
             val result2 = firebaseModel.getCardsMeByIdLenguajes(id).await()
-            val docs=result.documents.union(result2.documents)
+            val docs = result.documents.union(result2.documents)
             for (doc in docs) {
                 var item = Memos(
                     id = doc.id,
@@ -63,6 +63,7 @@ class HomeScreenViewModel @Inject constructor(
                     reading_kun = doc["reading_kun"].toString(),
                     value = doc["value"].toString(),
                     reading = doc["reading"].toString(),
+                    made_in = doc["made_in"].toString(),
                     widget = (doc["widget"] ?: false) as Boolean
                 )
                 memosValues.add(item)
