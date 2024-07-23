@@ -114,4 +114,18 @@ class FirebaseModel @Inject constructor() {
             db.collection(KeyCollections.MEMOS.collection).add(memoCreate)
         }
     }
+
+    suspend fun updateMemo(memo: Memos) {
+        val memoCreate = hashMapOf<String, Any?>()
+        memoCreate.put("key", memo.key)
+        memoCreate.put("value", memo.value)
+        memoCreate.put("reading", memo.reading.orEmpty())
+        memoCreate.put("reading_on", memo.reading_on.orEmpty())
+        memoCreate.put("reading_kun", memo.reading_kun.orEmpty())
+        memoCreate.put("widget", memo.widget!!.or(false))
+        memoCreate.put("made_in", auth.currentUser!!.email)
+        return withContext(Dispatchers.IO) {
+            db.collection(KeyCollections.MEMOS.collection).document(memo.id).update(memoCreate)
+        }
+    }
 }

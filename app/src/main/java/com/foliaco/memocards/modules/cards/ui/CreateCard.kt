@@ -90,7 +90,7 @@ fun CrateCardScreen(viewModel: HomeScreenViewModel) {
     } else if (msg == "Todo mal") {
         AlertDialog(
             text = {
-                Text(text = "Ocurrió un erro al guardar el memo", textAlign = TextAlign.Center)
+                Text(text = "Ocurrió un error al guardar el memo", textAlign = TextAlign.Center)
             },
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
@@ -118,7 +118,7 @@ fun CrateCardScreen(viewModel: HomeScreenViewModel) {
 fun PreviewCard(viewModel: HomeScreenViewModel, memo: Memos) {
     Column(modifier = Modifier.padding(10.dp)) {
         Text(text = "Preview", modifier = Modifier.padding(bottom = 10.dp))
-        CardItemList(modifier = Modifier, memo = memo, viewModel = viewModel)
+        CardItemList(modifier = Modifier, memo = memo, viewModel = viewModel, null)
     }
 }
 

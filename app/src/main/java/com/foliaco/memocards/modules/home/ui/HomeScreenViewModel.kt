@@ -104,4 +104,19 @@ class HomeScreenViewModel @Inject constructor(
             isLoadinCreateMemos.postValue(false)
         }
     }
+
+    fun updateMemoDb() {
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            isLoadinCreateMemos.postValue(true)
+            try {
+                firebaseModel.updateMemo(memoCreate.value!!)
+                isSuccessFullOrError.postValue("Todo bien")
+            } catch (er: Exception) {
+                Log.i("Error firebase Model", "${er.message}")
+                isSuccessFullOrError.postValue("Todo mal")
+            }
+            isLoadinCreateMemos.postValue(false)
+        }
+    }
 }

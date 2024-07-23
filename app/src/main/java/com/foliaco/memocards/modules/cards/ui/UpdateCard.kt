@@ -15,40 +15,68 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.foliaco.memocards.modules.home.model.Memos
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.theme.ColorText
 import com.foliaco.memocards.modules.theme.ColorText2
+import com.foliaco.memocards.screens.ListScreensHome
 
 @Composable
-fun UpdateCardScreen(viewModel: HomeScreenViewModel) {
-    val memo: Memos by viewModel.memoCreate.observeAsState(
-        initial = Memos(
-            id = "",
-            widget = false
+fun UpdateCardScreen(viewModel: HomeScreenViewModel, id: String, navController: NavController) {
+    val memos: MutableList<Memos> by viewModel.memos.observeAsState(mutableListOf())
+    val memo: Memos by viewModel.memoCreate.observeAsState(Memos(id = id, widget = false))
+    LaunchedEffect(Unit) {
+        val _memo = memos.find { it.id == id }
+        viewModel.memoCreate.postValue(_memo ?: Memos(id = id, widget = false))
+    }
+
+    if (memo.id == "") {
+        return AlertDialog(
+            text = {
+                Text(text = "El memo seleccionado no existe", textAlign = TextAlign.Center)
+            },
+            onDismissRequest = {
+                viewModel.isSuccessFullOrError.postValue("")
+            },
+            buttons = {
+                TextButton(
+                    onClick = {
+                        viewModel.isSuccessFullOrError.postValue("")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Confirmar", color = Color(0xFFFFFFFF))
+                }
+            },
+            backgroundColor = MaterialTheme.colorScheme.background
         )
-    )
+    }
+
     val msg: String by viewModel.isSuccessFullOrError.observeAsState(initial = "")
     if (msg == "Todo bien") {
         AlertDialog(
             text = {
-                Text(text = "El memo se guardo correctamente", textAlign = TextAlign.Center)
+                Text(text = "El memo se actualizo correctamente", textAlign = TextAlign.Center)
             },
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
                 viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                navController.navigate(ListScreensHome.home.route)
             },
             buttons = {
                 TextButton(
                     onClick = {
                         viewModel.isSuccessFullOrError.postValue("")
                         viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                        navController.navigate(ListScreensHome.home.route)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -60,7 +88,7 @@ fun UpdateCardScreen(viewModel: HomeScreenViewModel) {
     } else if (msg == "Todo mal") {
         AlertDialog(
             text = {
-                Text(text = "Ocurrió un erro al guardar el memo", textAlign = TextAlign.Center)
+                Text(text = "Ocurrió un error al actualizar el memo", textAlign = TextAlign.Center)
             },
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
@@ -94,7 +122,7 @@ fun UpdateCardForm(viewModel: HomeScreenViewModel, memo: Memos) {
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        ListLenguajes(viewModel, memo)
+        //ListLenguajes(viewModel, memo)
         InputWordKey(viewModel, memo)
         InputWordValue(viewModel, memo)
         InputWordReading(viewModel, memo)
@@ -107,7 +135,7 @@ fun UpdateCardForm(viewModel: HomeScreenViewModel, memo: Memos) {
                 if (isLoading) {
 
                 } else if ((memo.value.orEmpty() != "") && (memo.value.orEmpty() != "") && memo.lenguajeId.orEmpty() != "") {
-                    viewModel.saveMemoDb()
+                    viewModel.updateMemoDb()
                 }
             },
             enabled = (memo.value.orEmpty() != "") && (memo.value.orEmpty() != "") && memo.lenguajeId.orEmpty() != "",

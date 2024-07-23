@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.foliaco.memocards.modules.home.model.Memos
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.theme.ColorText
@@ -44,10 +45,16 @@ import com.foliaco.memocards.modules.theme.DisableButton
 import com.foliaco.memocards.modules.theme.DisableText
 import com.foliaco.memocards.modules.theme.Hard
 import com.foliaco.memocards.modules.theme.Middle
+import com.foliaco.memocards.screens.ListScreensHome
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel) {
+fun CardItemList(
+    modifier: Modifier,
+    memo: Memos,
+    viewModel: HomeScreenViewModel,
+    navController: NavHostController?
+) {
     val context = LocalContext.current
     var openOptions by remember { mutableStateOf(false) }
     val size by animateDpAsState(if (openOptions) 120.dp else 0.dp, label = "DpAnimate")
@@ -63,21 +70,25 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
                 enabled = true,
                 onClick = {},
                 onLongClick = {
-                    println("memo.made_in ${memo.made_in}")
-                    if (memo.made_in == "admin") {
-                        Toast
-                            .makeText(
-                                context,
-                                "Solo puedes eliminar tus tarjetas",
-                                Toast.LENGTH_SHORT,
-                            )
-                            .show()
-                    } else {
-                        openOptions = !openOptions
-                    }
-                },
+                    val currentRoute = navController!!.currentDestination
 
-                ),
+                    if (currentRoute?.route != ListScreensHome.update.route) {
+                        println("memo.made_in ${memo.made_in}")
+                        if (memo.made_in == "admin") {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Solo puedes eliminar tus tarjetas",
+                                    Toast.LENGTH_SHORT,
+                                )
+                                .show()
+                        } else {
+                            openOptions = !openOptions
+                        }
+                    }
+
+                },
+            ),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
@@ -165,7 +176,9 @@ fun CardItemList(modifier: Modifier, memo: Memos, viewModel: HomeScreenViewModel
                 modifier = Modifier.width(size)
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController?.navigate(route = "${ListScreensHome.update.route}/${memo.id}")
+                    },
                     colors = ButtonColors(
                         contentColor = Color.White,
                         disabledContentColor = Color.Transparent,

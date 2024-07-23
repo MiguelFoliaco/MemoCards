@@ -36,6 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.foliaco.memocards.modules.components.CardItemList
 import com.foliaco.memocards.modules.components.SelectLenguaje
 import com.foliaco.memocards.modules.home.model.FirebaseModel
@@ -52,7 +54,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeScreenViewModel) {
+fun HomeScreen(viewModel: HomeScreenViewModel, navController: NavHostController) {
     val auth = Firebase.auth
     val user = auth.currentUser
     val sheetState = rememberModalBottomSheetState()
@@ -136,7 +138,10 @@ fun HomeScreen(viewModel: HomeScreenViewModel) {
                                 Column {
 
                                     CardItemList(
-                                        modifier = Modifier, memo = memos[it], viewModel = viewModel
+                                        modifier = Modifier,
+                                        memo = memos[it],
+                                        viewModel = viewModel,
+                                        navController = navController
                                     )
                                     if (it % 3 == 0 && user!!.email.orEmpty() != "foliaco18@gmail.com") {
                                         Row(

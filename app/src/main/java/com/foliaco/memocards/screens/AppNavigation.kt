@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.foliaco.memocards.HomeActivity
 import com.foliaco.memocards.modules.cards.ui.CrateCardScreen
 import com.foliaco.memocards.modules.cards.ui.CreateCardForm
+import com.foliaco.memocards.modules.cards.ui.UpdateCardScreen
 import com.foliaco.memocards.modules.components.ScaffoldCustomHome
 import com.foliaco.memocards.modules.home.ui.HomeScreen
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
@@ -50,12 +51,22 @@ fun AppNavigationHome(viewModel: HomeScreenViewModel, clearActivity: () -> Unit)
     NavHost(navController = navController, startDestination = ListScreensHome.home.route) {
         composable(route = ListScreensHome.home.route) {
             ScaffoldCustomHome(navController, clearActivity) {
-                HomeScreen(viewModel = viewModel)
+                HomeScreen(viewModel = viewModel, navController)
             }
         }
         composable(route = ListScreensHome.add.route) {
             ScaffoldCustomHome(navController, clearActivity) {
                 CrateCardScreen(viewModel)
+            }
+        }
+        composable(route = "${ListScreensHome.update.route}/{id}") { backentry ->
+            ScaffoldCustomHome(navController = navController, clearActivity = clearActivity) {
+                val id = backentry.arguments!!.getString("id")
+                UpdateCardScreen(
+                    viewModel = viewModel,
+                    id = id.orEmpty(),
+                    navController = navController
+                )
             }
         }
     }
