@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -69,12 +70,21 @@ import com.foliaco.memocards.modules.theme.ColorText2
 
 @Composable
 fun CrateCardScreen(viewModel: HomeScreenViewModel) {
+    LaunchedEffect(key1 = Unit) {
+        viewModel.memoCreate.postValue(
+            Memos(
+                id = "",
+                widget = false
+            )
+        )
+    }
     val memo: Memos by viewModel.memoCreate.observeAsState(
         initial = Memos(
             id = "",
             widget = false
         )
     )
+
 
     val msg: String by viewModel.isSuccessFullOrError.observeAsState(initial = "")
     if (msg == "Todo bien") {
@@ -85,14 +95,14 @@ fun CrateCardScreen(viewModel: HomeScreenViewModel) {
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
                 viewModel.memoCreate.postValue(Memos(id = "", widget = false))
-                viewModel.listTraductions.postValue(mutableListOf())
+                viewModel.listTraductions = mutableListOf()
             },
             buttons = {
                 TextButton(
                     onClick = {
                         viewModel.isSuccessFullOrError.postValue("")
                         viewModel.memoCreate.postValue(Memos(id = "", widget = false))
-                        viewModel.listTraductions.postValue(mutableListOf())
+                        viewModel.listTraductions = (mutableListOf())
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -208,6 +218,7 @@ fun ListLenguajes(viewModel: HomeScreenViewModel, memo: Memos) {
                 Chip(
                     onClick = {
                         viewModel.memoCreate.postValue(memo.copy(lenguajeId = it))
+
                     },
                     modifier = Modifier
                         .padding(horizontal = 5.dp)
@@ -226,9 +237,17 @@ fun ListLenguajes(viewModel: HomeScreenViewModel, memo: Memos) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InputWordKey(viewModel: HomeScreenViewModel, memo: Memos) {
 
+    val loadingTranslateReverse: Boolean by viewModel.loadingTranslationReverse.observeAsState(
+        initial = false
+    )
+    val height by animateIntAsState(
+        targetValue = if (viewModel.listTraductionsReverse.size > 0) 50 else 0,
+        label = "Dp Height"
+    )
     var text by remember { mutableStateOf(memo.key.orEmpty()) }
     val msg: String by viewModel.isSuccessFullOrError.observeAsState(initial = "")
     if (msg === "Todo bien") {
@@ -274,7 +293,63 @@ fun InputWordKey(viewModel: HomeScreenViewModel, memo: Memos) {
                 unfocusedIndicatorColor = Color.Transparent,
                 unfocusedLabelColor = Color(0xFF111111),
             ),
+            trailingIcon = {
+                Row(
+                    modifier = Modifier.padding(end = 5.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.deepl_logo),
+                        contentDescription = "Traductor",
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(100.dp)
+                            .padding(horizontal = 3.dp, vertical = 5.dp)
+                            .clip(shape = RoundedCornerShape(3.dp))
+                            .background(Color.White)
+                            .clickable {
+                                viewModel.translateValue()
+                            }
+                    )
+                }
+            }
         )
+
+
+        if (viewModel.listTraductionsReverse.size > 0) {
+            Text(text = "Traducciones...")
+        }
+        if (loadingTranslateReverse) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.secondary
+            )
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(height.dp)
+            ) {
+                items(viewModel.listTraductionsReverse) {
+                    Chip(
+                        onClick = {
+                            text = it.text
+                            viewModel.memoCreate.postValue(memo.copy(key = text))
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp)
+                            .clickable { },
+                        colors = ChipDefaults.chipColors(
+                            backgroundColor = if (memo.key == it.text) MaterialTheme.colorScheme.primary else ColorText2
+                        )
+                    ) {
+                        Text(
+                            "${it.text}",
+                            color = if (text == it.text) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -282,11 +357,10 @@ fun InputWordKey(viewModel: HomeScreenViewModel, memo: Memos) {
 @Composable
 fun InputWordValue(viewModel: HomeScreenViewModel, memo: Memos) {
     var text by remember { mutableStateOf(memo.value.orEmpty()) }
-    val translates: MutableList<TranslateDataResponse> by viewModel.listTraductions.observeAsState(
-        initial = mutableListOf()
-    )
+    val loadingTranslate: Boolean by viewModel.loadingTranslation.observeAsState(initial = false)
+
     val height by animateIntAsState(
-        targetValue = if (translates.size > 0) 50 else 0,
+        targetValue = if (viewModel.listTraductions.size > 0) 50 else 0,
         label = "Dp Height"
     )
 
@@ -348,32 +422,42 @@ fun InputWordValue(viewModel: HomeScreenViewModel, memo: Memos) {
                 }
             }
         )
-        Text(text = "Traducciones...")
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height.dp)
-        ) {
-            items(translates) {
-                Chip(
-                    onClick = {
-                        text = it.text
-                        viewModel.memoCreate.postValue(memo.copy(value = text))
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 5.dp)
-                        .clickable { },
-                    colors = ChipDefaults.chipColors(
-                        backgroundColor = if (memo.value == it.text) MaterialTheme.colorScheme.primary else ColorText2
-                    )
-                ) {
-                    Text(
-                        "${it.text}",
-                        color = if (text == it.text) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-                    )
+        if (viewModel.listTraductions.size > 0) {
+            Text(text = "Traducciones...")
+        }
+        if (loadingTranslate) {
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.secondary
+            )
+        } else {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(height.dp)
+            ) {
+                items(viewModel.listTraductions) {
+                    Chip(
+                        onClick = {
+                            text = it.text
+                            viewModel.memoCreate.postValue(memo.copy(value = text))
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp)
+                            .clickable { },
+                        colors = ChipDefaults.chipColors(
+                            backgroundColor = if (memo.value == it.text) MaterialTheme.colorScheme.primary else ColorText2
+                        )
+                    ) {
+                        Text(
+                            "${it.text}",
+                            color = if (text == it.text) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
+
     }
 }
 

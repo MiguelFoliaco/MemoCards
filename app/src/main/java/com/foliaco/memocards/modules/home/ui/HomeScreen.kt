@@ -111,6 +111,9 @@ fun HomeScreen(
                         name, id
                     )
                     viewModel.getCardByIdLenguaje(id)
+                    scope.launch {
+                        sheetState.hide()
+                    }
                 })
         }
         Column {

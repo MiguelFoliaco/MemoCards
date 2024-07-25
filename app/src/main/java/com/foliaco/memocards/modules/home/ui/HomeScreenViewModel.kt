@@ -1,8 +1,12 @@
 package com.foliaco.memocards.modules.home.ui
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.foliaco.memocards.modules.deepl.TranslateDataResponse
 import com.foliaco.memocards.modules.deepl.TranslateResponse
 import com.foliaco.memocards.modules.deepl.TranslateUseCase
@@ -12,16 +16,19 @@ import com.foliaco.memocards.modules.home.model.Memos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val firebaseModel: FirebaseModel,
     private val coinManager: CoinManager,
-    private val translateServices: TranslateUseCase
+    private val translateServices: TranslateUseCase,
 ) : ViewModel() {
 
     val lenguajeSelect = MutableLiveData<String>("Japones/日本語")
@@ -30,7 +37,6 @@ class HomeScreenViewModel @Inject constructor(
     var isLoadingMemos = MutableLiveData<Boolean>(true)
     val isLoadinCreateMemos = MutableLiveData(false)
     val isLoadinDeleteMemos = MutableLiveData(false)
-    val listTraductions = MutableLiveData<MutableList<TranslateDataResponse>>()
     val isSuccessFullOrError = MutableLiveData<String>("")
     val cointCount = MutableLiveData<Long>(0)
     val memoCreate = MutableLiveData(
@@ -38,6 +44,12 @@ class HomeScreenViewModel @Inject constructor(
             id = "", widget = false
         )
     )
+    var listTraductions: MutableList<TranslateDataResponse> by mutableStateOf(mutableListOf())
+
+    //   val listTraductions = MutableLiveData<MutableList<TranslateDataResponse>>()
+    val loadingTranslation = MutableLiveData(false)
+    var listTraductionsReverse: MutableList<TranslateDataResponse> by mutableStateOf(mutableListOf())
+    val loadingTranslationReverse = MutableLiveData(false)
 
     fun setLenguaje(name: String, id: String) {
         lenguajeSelect.postValue(name)
@@ -171,7 +183,6 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     fun translate() {
-
         if (memoCreate.value?.key != null && memoCreate.value?.lenguajeId != null) {
             val lenguajes = getLenguajes()
             val key = memoCreate.value?.lenguajeId!!.toString()
@@ -180,13 +191,48 @@ class HomeScreenViewModel @Inject constructor(
                 text.add("${memoCreate.value!!.key}")
                 val code = lenguajes!![key]!!["code"] as String?
                 if (code != null) {
-                    translateServices.translate(
-                        text = text,
-                        sourceTag = code,
-                        targetLang = "ES"
-                    )
-                    println("Traducido")
-                    listTraductions.postValue(translateServices.listResponseTranslate)
+                    viewModelScope.launch {
+                        loadingTranslation.postValue(true)
+                        println("Paso 1")
+                        val data = translateServices.translate(
+                            text = text,
+                            sourceTag = code,
+                            targetLang = "ES"
+                        )
+                        withContext(Dispatchers.Main) {
+                            println("Paso 2 $data")
+                            listTraductions = data.toMutableList()
+                            loadingTranslation.postValue(false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun translateValue() {
+        if (memoCreate.value?.value != null && memoCreate.value?.lenguajeId != null) {
+            val lenguajes = getLenguajes()
+            val key = memoCreate.value?.lenguajeId!!.toString()
+            if (lenguajes != null && key.length > 0) {
+                val text = mutableListOf<String>()
+                text.add("${memoCreate.value!!.value}")
+                val code = lenguajes!![key]!!["code"] as String?
+                if (code != null) {
+                    viewModelScope.launch {
+                        loadingTranslationReverse.postValue(true)
+                        println("Paso 1")
+                        val data = translateServices.translate(
+                            text = text,
+                            sourceTag = "ES",
+                            targetLang = code
+                        )
+                        withContext(Dispatchers.Main) {
+                            println("Paso 2 $data")
+                            listTraductionsReverse = data.toMutableList()
+                            loadingTranslationReverse.postValue(false)
+                        }
+                    }
                 }
             }
         }

@@ -24,6 +24,10 @@ class HomeActivity : ComponentActivity() {
     private val firebaseUser = FirebaseAuth.getInstance()
     private val viewModel: HomeScreenViewModel by viewModels()
 
+    companion object {
+        val context = this
+    }
+
     override fun onStart() {
         super.onStart()
         validateSession()
