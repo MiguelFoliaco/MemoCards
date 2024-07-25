@@ -128,4 +128,14 @@ class FirebaseModel @Inject constructor() {
             db.collection(KeyCollections.MEMOS.collection).document(memo.id).update(memoCreate)
         }
     }
+
+    suspend fun deleteMemo(id: String) {
+        return withContext(Dispatchers.IO) {
+            db.collection(KeyCollections.MEMOS.collection).document(id).delete()
+        }
+    }
+
+    fun getLenguaje(id: String): String {
+        return db.collection(KeyCollections.LENGUAJE.collection).document(id).id
+    }
 }

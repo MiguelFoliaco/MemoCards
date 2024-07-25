@@ -53,7 +53,7 @@ fun CardItemList(
     modifier: Modifier,
     memo: Memos,
     viewModel: HomeScreenViewModel,
-    navController: NavHostController?
+    navController : NavHostController?
 ) {
     val context = LocalContext.current
     var openOptions by remember { mutableStateOf(false) }
@@ -192,7 +192,11 @@ fun CardItemList(
                     Text(text = "Editar")
                 }
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        if (memo.id != "") {
+                            viewModel.deleteMemo(memo.id)
+                        }
+                    },
                     colors = ButtonColors(
                         contentColor = Color.White,
                         disabledContentColor = Color.Transparent,

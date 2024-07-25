@@ -1,12 +1,17 @@
 package com.foliaco.memocards.modules.cards.ui
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,9 +25,11 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
@@ -37,9 +44,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -50,7 +59,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.MutableLiveData
+import com.foliaco.memocards.R
 import com.foliaco.memocards.modules.components.CardItemList
+import com.foliaco.memocards.modules.deepl.TranslateDataResponse
 import com.foliaco.memocards.modules.home.model.Memos
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.theme.ColorText
@@ -64,6 +75,7 @@ fun CrateCardScreen(viewModel: HomeScreenViewModel) {
             widget = false
         )
     )
+
     val msg: String by viewModel.isSuccessFullOrError.observeAsState(initial = "")
     if (msg == "Todo bien") {
         AlertDialog(
@@ -73,12 +85,14 @@ fun CrateCardScreen(viewModel: HomeScreenViewModel) {
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
                 viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                viewModel.listTraductions.postValue(mutableListOf())
             },
             buttons = {
                 TextButton(
                     onClick = {
                         viewModel.isSuccessFullOrError.postValue("")
                         viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                        viewModel.listTraductions.postValue(mutableListOf())
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -264,9 +278,18 @@ fun InputWordKey(viewModel: HomeScreenViewModel, memo: Memos) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun InputWordValue(viewModel: HomeScreenViewModel, memo: Memos) {
     var text by remember { mutableStateOf(memo.value.orEmpty()) }
+    val translates: MutableList<TranslateDataResponse> by viewModel.listTraductions.observeAsState(
+        initial = mutableListOf()
+    )
+    val height by animateIntAsState(
+        targetValue = if (translates.size > 0) 50 else 0,
+        label = "Dp Height"
+    )
+
     val msg: String by viewModel.isSuccessFullOrError.observeAsState(initial = "")
     if (msg === "Todo bien") {
         text = ""
@@ -287,7 +310,6 @@ fun InputWordValue(viewModel: HomeScreenViewModel, memo: Memos) {
         TextField(
             value = text,
             onValueChange = {
-                it
                 text = it
                 viewModel.memoCreate.postValue(memo.copy(value = text))
             },
@@ -306,7 +328,52 @@ fun InputWordValue(viewModel: HomeScreenViewModel, memo: Memos) {
                 unfocusedIndicatorColor = Color.Transparent,
                 unfocusedLabelColor = Color(0xFF111111),
             ),
+            trailingIcon = {
+                Row(
+                    modifier = Modifier.padding(end = 5.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.deepl_logo),
+                        contentDescription = "Traductor",
+                        modifier = Modifier
+                            .height(40.dp)
+                            .width(100.dp)
+                            .padding(horizontal = 3.dp, vertical = 5.dp)
+                            .clip(shape = RoundedCornerShape(3.dp))
+                            .background(Color.White)
+                            .clickable {
+                                viewModel.translate()
+                            }
+                    )
+                }
+            }
         )
+        Text(text = "Traducciones...")
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height.dp)
+        ) {
+            items(translates) {
+                Chip(
+                    onClick = {
+                        text = it.text
+                        viewModel.memoCreate.postValue(memo.copy(value = text))
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 5.dp)
+                        .clickable { },
+                    colors = ChipDefaults.chipColors(
+                        backgroundColor = if (memo.value == it.text) MaterialTheme.colorScheme.primary else ColorText2
+                    )
+                ) {
+                    Text(
+                        "${it.text}",
+                        color = if (text == it.text) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
     }
 }
 

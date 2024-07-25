@@ -31,8 +31,8 @@ fun SelectLenguaje(
                 }
             },
             sheetState = sheetState,
-
-            ) {
+            scrimColor = Color.Black.copy(alpha = 0.2f),
+        ) {
             LazyColumn(
             ) {
                 items(listLenguajes.size) {

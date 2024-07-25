@@ -1,14 +1,12 @@
 package com.foliaco.memocards.screens
 
 import android.content.Intent
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.foliaco.memocards.HomeActivity
 import com.foliaco.memocards.modules.cards.ui.CrateCardScreen
-import com.foliaco.memocards.modules.cards.ui.CreateCardForm
 import com.foliaco.memocards.modules.cards.ui.UpdateCardScreen
 import com.foliaco.memocards.modules.components.ScaffoldCustomHome
 import com.foliaco.memocards.modules.home.ui.HomeScreen
@@ -45,22 +43,29 @@ fun AppNavigation(loginGoogle: () -> Unit) {
 
 
 @Composable
-fun AppNavigationHome(viewModel: HomeScreenViewModel, clearActivity: () -> Unit) {
+fun AppNavigationHome(
+    viewModel: HomeScreenViewModel,
+    clearActivity: () -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = ListScreensHome.home.route) {
         composable(route = ListScreensHome.home.route) {
-            ScaffoldCustomHome(navController, clearActivity) {
+            ScaffoldCustomHome(navController, clearActivity, viewModel) {
                 HomeScreen(viewModel = viewModel, navController)
             }
         }
         composable(route = ListScreensHome.add.route) {
-            ScaffoldCustomHome(navController, clearActivity) {
+            ScaffoldCustomHome(navController, clearActivity, viewModel) {
                 CrateCardScreen(viewModel)
             }
         }
         composable(route = "${ListScreensHome.update.route}/{id}") { backentry ->
-            ScaffoldCustomHome(navController = navController, clearActivity = clearActivity) {
+            ScaffoldCustomHome(
+                navController = navController,
+                clearActivity = clearActivity,
+                viewModel
+            ) {
                 val id = backentry.arguments!!.getString("id")
                 UpdateCardScreen(
                     viewModel = viewModel,

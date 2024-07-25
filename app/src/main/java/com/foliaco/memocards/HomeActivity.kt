@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import com.foliaco.memocards.modules.economia.model.CoinManager
 import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.modules.theme.MemoCardsTheme
 import com.foliaco.memocards.screens.AppNavigationHome

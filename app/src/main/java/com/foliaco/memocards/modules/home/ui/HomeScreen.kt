@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.foliaco.memocards.modules.components.CardItemList
 import com.foliaco.memocards.modules.components.SelectLenguaje
+import com.foliaco.memocards.modules.economia.model.CoinManager
 import com.foliaco.memocards.modules.home.model.FirebaseModel
 import com.foliaco.memocards.modules.home.model.Memos
 import com.foliaco.memocards.utils.bottomBorder
@@ -54,7 +55,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeScreenViewModel, navController: NavHostController) {
+fun HomeScreen(
+    viewModel: HomeScreenViewModel,
+    navController: NavHostController
+) {
     val auth = Firebase.auth
     val user = auth.currentUser
     val sheetState = rememberModalBottomSheetState()
@@ -64,7 +68,9 @@ fun HomeScreen(viewModel: HomeScreenViewModel, navController: NavHostController)
     val lenguajeIdSelected: String by viewModel.lenguajeIdSelect.observeAsState("")
     val isLoadingMemos: Boolean by viewModel.isLoadingMemos.observeAsState(initial = true)
     val memos: MutableList<Memos> by viewModel.memos.observeAsState(mutableListOf())
+
     LaunchedEffect(key1 = Unit) {
+        viewModel.getCoinByUser()
         viewModel.getCardByIdLenguaje(lenguajeIdSelected)
     }
 

@@ -69,6 +69,7 @@ fun UpdateCardScreen(viewModel: HomeScreenViewModel, id: String, navController: 
             onDismissRequest = {
                 viewModel.isSuccessFullOrError.postValue("")
                 viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                viewModel.listTraductions.postValue(mutableListOf())
                 navController.navigate(ListScreensHome.home.route)
             },
             buttons = {
@@ -76,6 +77,7 @@ fun UpdateCardScreen(viewModel: HomeScreenViewModel, id: String, navController: 
                     onClick = {
                         viewModel.isSuccessFullOrError.postValue("")
                         viewModel.memoCreate.postValue(Memos(id = "", widget = false))
+                        viewModel.listTraductions.postValue(mutableListOf())
                         navController.navigate(ListScreensHome.home.route)
                     },
                     modifier = Modifier.fillMaxWidth()

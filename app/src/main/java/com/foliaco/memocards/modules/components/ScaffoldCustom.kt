@@ -1,6 +1,8 @@
 package com.foliaco.memocards.modules.components
 
 import android.content.Intent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
@@ -27,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,12 +41,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import com.foliaco.memocards.MainActivity
 import com.foliaco.memocards.R
+import com.foliaco.memocards.modules.home.ui.HomeScreenViewModel
 import com.foliaco.memocards.screens.ListScreensHome
 import com.foliaco.memocards.utils.bottomBorder
 import com.google.firebase.Firebase
@@ -54,10 +62,12 @@ import com.google.firebase.auth.auth
 fun ScaffoldCustomHome(
     navController: NavController,
     clearActivity: () -> Unit,
+    viewModel: HomeScreenViewModel,
     content: @Composable () -> Unit,
 ) {
     val auth = Firebase.auth
     val user = auth.currentUser
+    val cointCount: Long by viewModel.cointCount.observeAsState(initial = 0)
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         modifier = Modifier.fillMaxSize(),
@@ -83,17 +93,25 @@ fun ScaffoldCustomHome(
         },
         bottomBar = {
             if (user != null) {
-                BottomBarHome(user, navController, clearActivity)
+                BottomBarHome(user, navController, cointCount, clearActivity)
             }
         }) { paddingValues ->
+
         Column(modifier = Modifier.padding(paddingValues)) {
+            ValidateConnect()
             content()
         }
     }
 }
 
 @Composable
-fun BottomBarHome(user: FirebaseUser, navController: NavController, clearActivity: () -> Unit) {
+fun BottomBarHome(
+    user: FirebaseUser,
+    navController: NavController,
+    count: Long,
+    clearActivity: () -> Unit
+) {
+
     BottomAppBar(
         modifier = Modifier.height(70.dp),
         containerColor = MaterialTheme.colorScheme.primary,
@@ -110,19 +128,22 @@ fun BottomBarHome(user: FirebaseUser, navController: NavController, clearActivit
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val currentRoute = navController.currentDestination!!.route.orEmpty()
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .size(30.dp)
-                    .fillMaxHeight()
-                    .align(Alignment.CenterVertically)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.label),
-                    contentDescription = "label button",
-                    tint = if (currentRoute === ListScreensHome.target.route) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.background,
-                    modifier = Modifier.size(60.dp)
-                )
+                    Image(
+                        painter = painterResource(id = R.drawable.coin),
+                        contentDescription = "label button",
+                        //tint = if (currentRoute === ListScreensHome.target.route) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.background,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = "$count",
+                        fontSize = 10.sp,
+                        color = Color(0xFFFFFFFF),
+                        textAlign = TextAlign.Center,
+                    )
             }
             IconButton(
                 onClick = {
@@ -134,7 +155,7 @@ fun BottomBarHome(user: FirebaseUser, navController: NavController, clearActivit
                     painter = painterResource(id = R.drawable.home),
                     contentDescription = "label button",
                     tint = if (currentRoute === ListScreensHome.home.route) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.background,
-                    modifier = Modifier.size(60.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
 

@@ -21,6 +21,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildFeatures {
+            buildConfig = true
+        }
+        buildConfigField("String", "apikeydeepl", "\"\"")
     }
 
     buildTypes {
@@ -78,8 +82,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
     // AddMob
     implementation("com.google.android.gms:play-services-ads:23.2.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
